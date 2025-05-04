@@ -1,0 +1,145 @@
+{% extends 'base.html' %}
+
+{% block title %}Login - ScreenSync{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto">
+    <h1 class="text-3xl font-bold mb-6 text-purple-400">Login to ScreenSync</h1>
+    
+    <div class="bg-gray-800 p-6 rounded-lg">
+        <form method="post" class="space-y-4">
+            {% csrf_token %}
+            
+            {% if form.errors %}
+                <div class="bg-red-900/50 border border-red-500 text-red-200 p-3 rounded-lg mb-4">
+                    <p>Your username and password didn't match. Please try again.</p>
+                </div>
+            {% endif %}
+            
+            <div>
+                <label for="id_username" class="block text-sm font-medium mb-1">Username</label>
+                <input type="text" name="username" id="id_username" required 
+                       class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+            </div>
+            
+            <div>
+                <label for="id_password" class="block text-sm font-medium mb-1">Password</label>
+                <input type="password" name="password" id="id_password" required
+                       class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+            </div>
+            
+            <div>
+                <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded-lg transition">
+                    Login
+                </button>
+            </div>
+        </form>
+        
+        <div class="mt-4 text-center">
+            <p class="text-gray-400">Don't have an account? <a href="{% url 'register' %}" class="text-purple-400 hover:underline">Register</a></p>
+        </div>
+    </div>
+    
+    <div id="animation-container" class="w-full h-[300px] rounded-lg mt-8"></div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // 3D Animation with Three.js
+    document.addEventListener('DOMContentLoaded', function() {
+        const container = document.getElementById('animation-container');
+        
+        // Scene setup
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        
+        renderer.setSize(container.clientWidth, container.clientHeight);
+        renderer.setClearColor(0x000000, 0);
+        container.appendChild(renderer.domElement);
+        
+        // Create a floating screen
+        const screenGroup = new THREE.Group();
+        
+        // Screen frame
+        const frameGeometry = new THREE.BoxGeometry(3, 2, 0.1);
+        const frameMaterial = new THREE.MeshPhongMaterial({ color: 0x333333 });
+        const frame = new THREE.Mesh(frameGeometry, frameMaterial);
+        
+        // Screen display
+        const screenGeometry = new THREE.PlaneGeometry(2.8, 1.8);
+        const screenMaterial = new THREE.MeshPhongMaterial({ 
+            color: 0x9c5bff,
+            emissive: 0x9c5bff,
+            emissiveIntensity: 0.5
+        });
+        const screen = new THREE.Mesh(screenGeometry, screenMaterial);
+        screen.position.z = 0.06;
+        
+        screenGroup.add(frame);
+        screenGroup.add(screen);
+        screenGroup.position.z = -5;
+        
+        scene.add(screenGroup);
+        
+        // Add particles around the screen
+        const particlesGeometry = new THREE.BufferGeometry();
+        const particleCount = 100;
+        
+        const posArray = new Float32Array(particleCount * 3);
+        
+        for(let i = 0; i < particleCount * 3; i += 3) {
+            // Position particles in a sphere around the screen
+            const radius = 3;
+            const theta = Math.random() * Math.PI * 2;
+            const phi = Math.random() * Math.PI;
+            
+            posArray[i] = radius * Math.sin(phi) * Math.cos(theta);
+            posArray[i+1] = radius * Math.sin(phi) * Math.sin(theta);
+            posArray[i+2] = radius * Math.cos(phi) - 5; // Offset to center around screen
+        }
+        
+        particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+        
+        const particlesMaterial = new THREE.PointsMaterial({
+            size: 0.05,
+            color: 0x9c5bff,
+            transparent: true,
+            opacity: 0.8
+        });
+        
+        const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
+        scene.add(particlesMesh);
+        
+        // Add lights
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+        scene.add(ambientLight);
+        
+        const pointLight = new THREE.PointLight(0xffffff, 1);
+        pointLight.position.set(0, 0, 0);
+        scene.add(pointLight);
+        
+        // Animation
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            screenGroup.rotation.y = Math.sin(Date.now() * 0.001) * 0.2;
+            screenGroup.rotation.x = Math.sin(Date.now() * 0.0005) * 0.1;
+            
+            particlesMesh.rotation.y += 0.002;
+            
+            renderer.render(scene, camera);
+        }
+        
+        animate();
+        
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            camera.aspect = container.clientWidth / container.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+        });
+    });
+</script>
+{% endblock %}

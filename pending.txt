@@ -1,0 +1,5 @@
+Register Credentials log to database
+Test Multi-Device Connection
+Room buttons and settings
+Chats Feature
+Try for better UI

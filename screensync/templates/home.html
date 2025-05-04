@@ -1,0 +1,143 @@
+{% extends 'base.html' %}
+
+{% block title %}ScreenSync - Share Your Screen{% endblock %}
+
+{% block content %}
+<div class="flex flex-col md:flex-row items-center justify-between">
+    <div class="md:w-1/2 mb-8 md:mb-0">
+        <h1 class="text-4xl md:text-6xl font-bold mb-6 text-purple-400">Share Your Screen Seamlessly</h1>
+        <p class="text-xl mb-8 text-gray-300">Connect multiple devices with perfect synchronization. Share your screen, collaborate, and present with ease.</p>
+        <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+            <a href="{% url 'create_room' %}" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg text-center transition transform hover:scale-105">Create Room</a>
+            <a href="{% url 'join_room' %}" class="bg-gray-700 hover:bg-gray-600 text-white px-6 py-3 rounded-lg text-center transition transform hover:scale-105">Join Room</a>
+        </div>
+    </div>
+    <div class="md:w-1/2">
+        <div id="animation-container" class="w-full h-[400px] rounded-lg"></div>
+    </div>
+</div>
+
+<div class="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8">
+    <div class="bg-gray-800 p-6 rounded-lg">
+        <div class="text-purple-400 text-4xl mb-4">
+            <i class="fas fa-share-alt"></i>
+        </div>
+        <h3 class="text-xl font-bold mb-2">Instant Sharing</h3>
+        <p class="text-gray-300">Share your screen with anyone, anywhere with just a few clicks.</p>
+    </div>
+    <div class="bg-gray-800 p-6 rounded-lg">
+        <div class="text-purple-400 text-4xl mb-4">
+            <i class="fas fa-sync"></i>
+        </div>
+        <h3 class="text-xl font-bold mb-2">Perfect Sync</h3>
+        <p class="text-gray-300">Real-time synchronization across all connected devices.</p>
+    </div>
+    <div class="bg-gray-800 p-6 rounded-lg">
+        <div class="text-purple-400 text-4xl mb-4">
+            <i class="fas fa-lock"></i>
+        </div>
+        <h3 class="text-xl font-bold mb-2">Secure Connection</h3>
+        <p class="text-gray-300">End-to-end encrypted connections for your privacy and security.</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // 3D Animation with Three.js
+    document.addEventListener('DOMContentLoaded', function() {
+        const container = document.getElementById('animation-container');
+        
+        // Scene setup
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        
+        renderer.setSize(container.clientWidth, container.clientHeight);
+        renderer.setClearColor(0x000000, 0);
+        container.appendChild(renderer.domElement);
+        
+        // Create devices (screens)
+        function createDevice(x, y, z, color) {
+            const group = new THREE.Group();
+            
+            // Screen frame
+            const frameGeometry = new THREE.BoxGeometry(2, 1.2, 0.1);
+            const frameMaterial = new THREE.MeshPhongMaterial({ color: 0x333333 });
+            const frame = new THREE.Mesh(frameGeometry, frameMaterial);
+            
+            // Screen display
+            const screenGeometry = new THREE.PlaneGeometry(1.8, 1);
+            const screenMaterial = new THREE.MeshPhongMaterial({ 
+                color: color,
+                emissive: color,
+                emissiveIntensity: 0.5
+            });
+            const screen = new THREE.Mesh(screenGeometry, screenMaterial);
+            screen.position.z = 0.06;
+            
+            group.add(frame);
+            group.add(screen);
+            group.position.set(x, y, z);
+            
+            return group;
+        }
+        
+        // Add devices
+        const device1 = createDevice(-2, 0, -5, 0x9c5bff);
+        const device2 = createDevice(0, 0, -6, 0x5b8fff);
+        const device3 = createDevice(2, 0, -5, 0xff5b8f);
+        
+        scene.add(device1);
+        scene.add(device2);
+        scene.add(device3);
+        
+        // Add connecting lines (representing sync)
+        function createLine(from, to, color) {
+            const points = [];
+            points.push(new THREE.Vector3(from.x, from.y, from.z));
+            points.push(new THREE.Vector3(to.x, to.y, to.z));
+            
+            const geometry = new THREE.BufferGeometry().setFromPoints(points);
+            const material = new THREE.LineBasicMaterial({ color: color });
+            return new THREE.Line(geometry, material);
+        }
+        
+        const line1 = createLine(device1.position, device2.position, 0x9c5bff);
+        const line2 = createLine(device2.position, device3.position, 0x5b8fff);
+        
+        scene.add(line1);
+        scene.add(line2);
+        
+        // Add lights
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+        scene.add(ambientLight);
+        
+        const pointLight = new THREE.PointLight(0xffffff, 1);
+        pointLight.position.set(0, 5, 0);
+        scene.add(pointLight);
+        
+        camera.position.z = 5;
+        
+        // Animation
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            device1.rotation.y += 0.01;
+            device2.rotation.y += 0.01;
+            device3.rotation.y += 0.01;
+            
+            renderer.render(scene, camera);
+        }
+        
+        animate();
+        
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            camera.aspect = container.clientWidth / container.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+        });
+    });
+</script>
+{% endblock %}
