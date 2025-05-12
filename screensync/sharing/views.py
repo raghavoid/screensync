@@ -70,14 +70,14 @@ def join_room(request):
 @login_required
 def room_view(request, room_id):
     room = get_object_or_404(Room, id=room_id)
-    print(f"Participants in room {room.name}: {room.participants.all()}")  # Debug statement
+    # print(f"Participants in room {room.name}: {room.participants.all()}")  # Debug statement
     
     # Check if user is a participant
     if request.user not in room.participants.all():
         print(f"Access denied for user {request.user.username}")  # Debug statement
         return redirect('join_room')
-    print(f"Access granted for user {request.user.username}")  # Debug statement
-    return render(request, 'room.html', {'room': room})
+    # print(f"Access granted for user {request.user.username}")  # Debug statement
+    return render(request, 'room.html', {'room': room, 'room_id': room_id})
 
 def register(request):
     if request.method == 'POST':
