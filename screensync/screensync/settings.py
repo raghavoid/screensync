@@ -80,6 +80,7 @@ CHANNEL_LAYERS = {
         'BACKEND': 'channels.layers.InMemoryChannelLayer',
     },
 }
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,

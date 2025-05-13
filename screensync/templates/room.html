@@ -88,6 +88,23 @@
     background-color: #4b5563;
     align-self: flex-start;
   }
+  .local-video{
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    width: 200px;
+    height: auto;
+    border-radius: 8px;
+    border: 2px solid #9c5bff;
+    z-index: 10;
+  }
+  .control-btn.bg-red-600{
+    background-color: #dc2626;
+  }
+  .local-video::webkit-media-controls{
+    display: flex !important;
+    opacity: 1 !important;
+  }
 </style>
 {% endblock %} {% block content %}
 <div class="flex flex-col space-y-6">
@@ -106,14 +123,14 @@
     </div>
   </div>
 
-  <div id="room-id" style="display: none;">{{ room_id }}</div>
+  <div id="room-id" data-room-id="{{ room_id }}" style="display: none;"></div>
 
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
     <div class="lg:col-span-2">
-      <div class="screen-container" style="aspect-ratio: 16/9">
+      <div class="screen-container" style="position: relative; width: 100%; border-radius: 0.5rem; overflow: hidden;">
         <video id="remote-screen-display" autoplay playsinline></video>
         <div class="controls">
-          <button id="join-button" class="control-btn">
+          <button id="screen-button" class="control-btn">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="20"
@@ -357,6 +374,7 @@
 
   <div id="animation-container" class="w-full h-[150px] rounded-lg"></div>
 </div>
-{% endblock %} {% block scripts %}
+{% endblock %} 
+{% block scripts %}
 <script src="{% static 'main.js' %}"></script>
 {% endblock %}

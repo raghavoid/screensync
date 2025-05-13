@@ -52,15 +52,16 @@ class RoomConsumer(AsyncWebsocketConsumer):
     async def receive(self, text_data):
         try:
             data = json.loads(text_data)
-            if data['type'] == 'message':
-                await self.channel_layer.group_send(
-                    self.room_group_name,
-                    {
-                        'type': 'relay_message',
-                        'message': data['message'],
-                        'username': self.scope['user'].username,
-                    }
-                )
+            message = data.get('message', '')
+
+            # Broadcast message to the group
+            await self.channel_layer.group_send(
+                self.room_group_name,
+                {
+                    'type': 'chat_message',
+                    'message': message,
+                }
+            )
         except Exception as e:
             logger.error(f"Error processing message: {str(e)}")
             await self.send(text_data=json.dumps({
@@ -84,3 +85,11 @@ class RoomConsumer(AsyncWebsocketConsumer):
         except Exception as e:
             logger.error(f"Error in user_leave: {str(e)}")
             logger.error(traceback.format_exc())
+
+    async def chat_message(self, event):
+        message = event['message']
+
+        # Send message to WebSocket
+        await self.send(text_data=json.dumps({
+            'message': message,
+        }))
